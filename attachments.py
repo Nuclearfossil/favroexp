@@ -67,3 +67,5 @@ for collection in selectedCollections:
             savedFilename = savedFilename.replace("\\", "_")
             savedFilename = savedFilename.replace("/", "_")
             urllib.request.urlretrieve(attachment['fileURL'], cardpath + "/" + savedFilename)
+
+print('Done.')

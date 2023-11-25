@@ -101,3 +101,5 @@ if __name__ == "__main__":
     loadedcomments = getcomments()
     print(f'loaded {len(loadedcomments)} comments')
     verifyattachmentsforcomments(loadedcomments, conf)
+
+    print('Done.')

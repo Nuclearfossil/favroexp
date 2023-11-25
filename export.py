@@ -352,106 +352,106 @@ def get_comments(cardId):
 
     return entities
 
+if __name__ == "__main__":
+    # --------------------------------------
+    # Initialize
+    # --------------------------------------
+    if not os.path.exists(dataPath):
+        try:
+            os.mkdir(dataPath)
+        except:
+            print('Data directory could not be created')
+            exit(1)
 
-# --------------------------------------
-# Initialize
-# --------------------------------------
-if not os.path.exists(dataPath):
-    try:
-        os.mkdir(dataPath)
-    except:
-        print('Data directory could not be created')
-        exit(1)
+    # --------------------------------------
+    # Download
+    # --------------------------------------
 
-# --------------------------------------
-# Download
-# --------------------------------------
+    print('Downloading collections...')
+    # if you're geting the full list of collections, uncomment out the content below
+    # collections = get_collections()
+    # collections.extend(get_collections(archived=False))
 
-print('Downloading collections...')
-# if you're geting the full list of collections, uncomment out the content below
-# collections = get_collections()
-# collections.extend(get_collections(archived=False))
+    # collections_path = os.path.join(dataPath, 'collections.json')
+    # with open(collections_path, "w") as f:
+    #  json.dump(collections, f, indent=1, sort_keys=False)
 
-# collections_path = os.path.join(dataPath, 'collections.json')
-# with open(collections_path, "w") as f:
-#  json.dump(collections, f, indent=1, sort_keys=False)
+    # otherwise, use the following
+    collections = get_select_collections()
+    collectionnames = [collection['name'] for collection in collections]
 
-# otherwise, use the following
-collections = get_select_collections()
-collectionnames = [collection['name'] for collection in collections]
+    print('Found ', len(collections))
 
-print('Found ', len(collections))
+    print('Downloading tags...')
+    tags = get_tags()
+    print('Found ', len(tags))
 
-print('Downloading tags...')
-tags = get_tags()
-print('Found ', len(tags))
-
-tags_path = os.path.join(dataPath, 'tags.json')
-with open(tags_path, "w") as f:
-    json.dump(tags, f, indent=1, sort_keys=False)
+    tags_path = os.path.join(dataPath, 'tags.json')
+    with open(tags_path, "w") as f:
+        json.dump(tags, f, indent=1, sort_keys=False)
 
 
-print('Downloading widgets...')
-widgets = get_widgets()
-widgets.extend(get_widgets(archived=False))
-print('Found ', len(widgets))
+    print('Downloading widgets...')
+    widgets = get_widgets()
+    widgets.extend(get_widgets(archived=False))
+    print('Found ', len(widgets))
 
-card_common_ids = set()
+    card_common_ids = set()
 
-print('Downloading cards...')
-for collection in collections:
-    print('Downloading cards for collection: ', collection.get('name'))
-    cards = list()
-    cards.extend(get_cards_for_collection(collection.get('collectionId')))
-    cards.extend(get_cards_for_collection(collection.get('collectionId'), archived=False))
-    collection['cards'] = cards
-    print('Found ', len(cards))
-    for card in cards:
-        card_common_ids.add(card['cardCommonId'])
+    print('Downloading cards...')
+    for collection in collections:
+        print('Downloading cards for collection: ', collection.get('name'))
+        cards = list()
+        cards.extend(get_cards_for_collection(collection.get('collectionId')))
+        cards.extend(get_cards_for_collection(collection.get('collectionId'), archived=False))
+        collection['cards'] = cards
+        print('Found ', len(cards))
+        for card in cards:
+            card_common_ids.add(card['cardCommonId'])
 
-for widget in widgets:
-    if widget.get('name') not in collectionnames:
-        continue
-    print('Downloading cards for widget: ', widget.get('name'))
-    cards = list()
-    cards.extend(get_cards_for_widget(widget.get('widgetCommonId')))
-    cards.extend(get_cards_for_widget(widget.get('widgetCommonId'), archived=False))
-    widget['cards'] = cards
-    print('Found ', len(cards))
-    for card in cards:
-        card_common_ids.add(card['cardCommonId'])
+    for widget in widgets:
+        if widget.get('name') not in collectionnames:
+            continue
+        print('Downloading cards for widget: ', widget.get('name'))
+        cards = list()
+        cards.extend(get_cards_for_widget(widget.get('widgetCommonId')))
+        cards.extend(get_cards_for_widget(widget.get('widgetCommonId'), archived=False))
+        widget['cards'] = cards
+        print('Found ', len(cards))
+        for card in cards:
+            card_common_ids.add(card['cardCommonId'])
 
-print('Downloading columns...')
-for widget in widgets:
-    if widget.get('name') not in collectionnames:
-        continue
-    print('Downloading columns for widget: ', widget.get('name'))
-    widget['columns'] = get_columns(widget.get('widgetCommonId'))
-    print('Found', len(widget['columns']))
+    print('Downloading columns...')
+    for widget in widgets:
+        if widget.get('name') not in collectionnames:
+            continue
+        print('Downloading columns for widget: ', widget.get('name'))
+        widget['columns'] = get_columns(widget.get('widgetCommonId'))
+        print('Found', len(widget['columns']))
 
-comments = dict()
-print('Downloading comments. This could take a while...')
-cardindex = 1
-for card_common_id in card_common_ids:
-    print(f'Downloading card index {cardindex}/{len(card_common_ids)}')
-    comments[card_common_id] = get_comments(card_common_id)
+    comments = dict()
+    print('Downloading comments. This could take a while...')
+    cardindex = 1
+    for card_common_id in card_common_ids:
+        print(f'Downloading card index {cardindex}/{len(card_common_ids)}')
+        comments[card_common_id] = get_comments(card_common_id)
 
-comment_count = sum(len(v) for k, v in comments.items())
-print('Found ', comment_count)
+    comment_count = sum(len(v) for k, v in comments.items())
+    print('Found ', comment_count)
 
-# --------------------------------------
-# Store
-# --------------------------------------
-collections_path = os.path.join(dataPath, 'select_collections.json')
-with open(collections_path, "w") as f:
-    json.dump(collections, f, indent=1, sort_keys=False)
+    # --------------------------------------
+    # Store
+    # --------------------------------------
+    collections_path = os.path.join(dataPath, 'select_collections.json')
+    with open(collections_path, "w") as f:
+        json.dump(collections, f, indent=1, sort_keys=False)
 
-widgets_path = os.path.join(dataPath, 'widgets.json')
-with open(widgets_path, "w") as f:
-    json.dump(widgets, f, indent=1, sort_keys=False)
+    widgets_path = os.path.join(dataPath, 'widgets.json')
+    with open(widgets_path, "w") as f:
+        json.dump(widgets, f, indent=1, sort_keys=False)
 
-comments_path = os.path.join(dataPath, 'selected_comments.json')
-with open(comments_path, "w") as f:
-    json.dump(comments, f, indent=1, sort_keys=False)
+    comments_path = os.path.join(dataPath, 'selected_comments.json')
+    with open(comments_path, "w") as f:
+        json.dump(comments, f, indent=1, sort_keys=False)
 
-print('Done.')
+    print('Done.')

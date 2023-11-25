@@ -61,3 +61,4 @@ for entry in selectedComments.items():
                 continue
 
             urllib.request.urlretrieve(attachment['fileURL'], commentpath + "/" + savedFilename)
+print('Done.')
